@@ -1,8 +1,9 @@
 # в функции read_new_question попробовать вытянуть все данные по вопросу и вреному ответу за 1 раз
 
 # попробовать разнести функции/классы по разным файлам
-# поработать  над цветовой палитрой
-# сделать настройки с переключением светлой темы и темной темы
+# поработать над цветовой палитрой
+# сделать настройки с переключением светлой темы и темной темы(разобрался как перекрашивать экраны)
+# брать и сохранять настройки из бд
 # польз настройки хранить в БД или научиться работать с конфигами
 
 
@@ -14,6 +15,7 @@ from datetime import datetime, timedelta
 import datetime
 import random
 import difflib
+from kivy.core.window import Window
 
 now = datetime.datetime.now()
 today = str(now.date())
@@ -77,7 +79,7 @@ class db:
 
         count_words = self.c.execute('select count(*), count(case when learned = 1 then 1 else 0 end) from words')
         count_words = count_words.fetchone()
-        count_words = 'Total words ' + str(count_words[0]) +' /stydied words ' + str(count_words[1])
+        count_words = 'Total words ' + str(count_words[0]) +' /studied words ' + str(count_words[1])
         print(count_words)
 
         data_sql = self.c.execute('select id,word,translation,number_of_attempts,number_true_attempts from words order by date_next_read limit 1')
@@ -178,6 +180,42 @@ class db:
         self.conn.commit()
         print('wrong')
 
+    def get_settings(self):
+        self.conn = sqlite3.connect('file_db.db')
+        self.c = self.conn.cursor()
+        #self.c.execute() сделать хранение и получение темы из БД
+        self.conn.commit()
+        theme = 2
+        return (theme)
+
+    def save_settings(self,theme):
+        print('save'+ str(theme))
+        self.conn = sqlite3.connect('file_db.db')
+        self.c = self.conn.cursor()
+        # self.c.execute() сделать сохранение темы БД
+        self.conn.commit()
+        pass
+
+class Screen_start(Screen):
+    def apply_settings(self):
+        global theme # 0 - темная,1 светлая, 2 серая, 3 желтая, 4 розовая, а почему-бы и нет
+        d = db.get_settings(self)
+        theme = d
+        if theme == 0:
+            Window.clearcolor = (0,0,0,1)
+        elif theme == 1:
+            Window.clearcolor = (0.8,0.8,0.8,0)
+        elif theme == 2:
+            Window.clearcolor = (0.3,0.3,0.3,1)
+        elif theme == 3:
+            Window.clearcolor = (1,1,0,1)
+        elif theme == 4:
+            Window.clearcolor = (1,0,0,1)
+        else:
+            print('какого хрена тут происходит?')
+        pass
+
+
 class Screen1(Screen):
     def paint(self):
         pass
@@ -258,7 +296,10 @@ class Screen1(Screen):
                 print('ой')
 
 class Screen2(Screen): #это будет экран настроек
-    pass
+    def save_settings(self,theme):
+        print(theme)
+        db.save_settings(self,theme)
+        pass
 
 
 class Screen_add(Screen):

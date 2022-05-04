@@ -1,10 +1,11 @@
 WindowManager:
+    Screen_start:
     Screen1:
     Screen2:
     Screen_add:
 
 <MyButton@Button>: # делаем свой класс, который унаследован от Button
-    background_color: [0.4,0.4,0.4,0.4]
+    background_color: [0.4,0.4,0.4,1]
     font_size: 24
 
 <MyTextInput@TextInput>: # делаем свой класс, который унаследован от TextInput
@@ -16,9 +17,20 @@ WindowManager:
     font_size: 32
     color: [1,1,1,1]
 
+<Screen_start>
+    name: "start"
+
+    MyButton:
+        id: StarMenu
+        size_hint: 0.25, 1
+        ext: 'add_word'
+        on_release:
+            root.apply_settings()
+            root.manager.transition.direction = "up"
+            app.root.current = "main"
+
 <Screen1>:
     name: "main"
-    color: [1,1,1,1]
     question: question
     answer1: Answer1
     answer2: Answer2
@@ -26,20 +38,20 @@ WindowManager:
     answer4: Answer4
     score: Score
 
-
-
     BoxLayout:
         orientation: 'vertical'
         padding: 10
-        background_color: [1, 1, 1, 1]
-        color: [1, 1, 1, 1]
+        #canvas.before:
+            #Color:
+            #    rgba: (1,1,1,1)
+            #Rectangle:
+            #   size: self.size
 
 
         BoxLayout:
             size_hint: 1, 0.1
             padding: 5
             spacing: 5
-            color: [0.4,0.4,0.4,0.4]
 
             MyButton:
                 id: StarMenu
@@ -105,20 +117,29 @@ WindowManager:
 
 <Screen2>:
     name: "second"
-    canvas.before:
-        Color:
-            rgba:  [0.4, 1, 1, 0.4]
-        Rectangle:
-            pos: self.pos
-            size: self.size
 
-    MyButton:
-        background_color: [0.4, 1, 1, 0.4]
-        size_hint: 0.5, 0.5
-        text: "Go Back"
-        on_release:
-            app.root.current = "main"
-            root.manager.transition.direction = "right"
+    BoxLayout:
+        orientation: 'vertical'
+        padding: 100
+        spacing: 20
+
+        MyButton:
+            id: Butt0
+            text: '0'
+            on_release:
+                root.save_settings(0)
+
+        MyButton:
+            id: Butt1
+            text: '1'
+            on_release:
+                root.save_settings(1)
+
+        MyButton:
+            text: "Go Back"
+            on_release:
+                app.root.current = "main"
+                root.manager.transition.direction = "right"
 
 <Screen_add>:
     name: "add_word"
