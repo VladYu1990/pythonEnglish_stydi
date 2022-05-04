@@ -1,0 +1,187 @@
+WindowManager:
+    Screen1:
+    Screen2:
+    Screen_add:
+
+<MyButton@Button>: # делаем свой класс, который унаследован от Button
+    background_color: [0.4,0.4,0.4,0.4]
+    font_size: 24
+
+<MyTextInput@TextInput>: # делаем свой класс, который унаследован от TextInput
+    background_color: [0.4,0.4,0.4,0.4]
+    font_size: 32
+
+<MyLabel@Label>
+    background_color: [0.4,0.4,0.4,0.4]
+    font_size: 32
+    color: [1,1,1,1]
+
+<Screen1>:
+    name: "main"
+    color: [1,1,1,1]
+    question: question
+    answer1: Answer1
+    answer2: Answer2
+    answer3: Answer3
+    answer4: Answer4
+
+
+
+    BoxLayout:
+        orientation: 'vertical'
+        padding: 10
+        background_color: [1, 1, 1, 1]
+        color: [1, 1, 1, 1]
+
+
+        BoxLayout:
+            size_hint: 1, 0.1
+            padding: 5
+            spacing: 5
+            color: [0.4,0.4,0.4,0.4]
+
+            MyButton:
+                id: StarMenu
+                size_hint: 0.25, 1
+                text: 'add_word'
+                on_release:
+                    app.root.current = "add_word"
+
+            MyButton:
+                size_hint: 0.5, 1
+                text: 'Hello1'
+
+            MyButton:
+                id: Settings
+                size_hint: 0.25, 1
+                text: 'Hello1234'
+                on_release:
+                    root.manager.transition.direction = "right"
+                    app.root.current = "second"
+
+        BoxLayout:
+            id: BL_question
+            orientation: 'vertical'
+            padding: 100
+            spacing: 20
+
+            MyButton:
+                id: question
+                text: 'test'
+                on_release:
+                    root.new_question()
+
+            GridLayout:
+                spacing: 20
+                cols: 2
+                font_size: 60
+
+                MyButton:
+                    id: Answer1
+                    text: '1'
+                    on_release:
+                        root.check_response(1,Answer1)
+
+                MyButton:
+                    id: Answer2
+                    text: '2'
+                    on_release:
+                        root.check_response(2,Answer2)
+                MyButton:
+                    id: Answer3
+                    text: '3'
+                    on_release:
+                        root.check_response(3,Answer3)
+
+                MyButton:
+                    id: Answer4
+                    text: '4'
+                    on_release:
+                        root.check_response(4,Answer4)
+
+
+<Screen2>:
+    name: "second"
+    canvas.before:
+        Color:
+            rgba:  [0.4, 1, 1, 0.4]
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
+    MyButton:
+        background_color: [0.4, 1, 1, 0.4]
+        size_hint: 0.5, 0.5
+        text: "Go Back"
+        on_release:
+            app.root.current = "main"
+            root.manager.transition.direction = "right"
+
+<Screen_add>:
+    name: "add_word"
+    screen_add_input_english_word: screen_add_input_english_word
+    screen_add_input_translation: screen_add_input_translation
+    screen_add_done: screen_add_done
+    screen_add_more: screen_add_more
+
+    BoxLayout:
+        id: screen_add_box
+        orientation: 'vertical'
+        padding: 10
+        spacing: 50
+
+
+
+        BoxLayout:
+            size_hint: 1, 0.1
+
+            MyButton:
+                font_size: 20
+                size_hint: 0.8, 1
+                text: "ADD NEW WORD"
+
+            MyButton:
+                font_size: 20
+                size_hint: 0.2, 1
+                text: "back"
+                on_release:
+                    app.root.current = "main"
+                    root.manager.transition.direction = "right"
+
+        BoxLayout:
+            padding: 60
+            spacing: 20
+            font_size: 60
+            orientation: 'vertical'
+
+            MyLabel:
+                text: 'add_English_word'
+                halign: 'right'
+
+            MyTextInput:
+                id: screen_add_input_english_word
+                text: ''
+
+            MyLabel:
+                text: 'add translation'
+
+            MyTextInput:
+                id: screen_add_input_translation
+                text: ''
+
+
+            MyButton:
+                id: screen_add_done
+                text: 'done'
+                on_release:
+                    app.root.current = "main"
+                    root.manager.transition.direction = "right"
+                    root.add_db_word()
+                    root.clear_input()
+
+            MyButton:
+                id: screen_add_more
+                text: "add_more"
+                on_release:
+                    root.clear_input()
+
