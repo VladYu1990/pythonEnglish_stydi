@@ -3,7 +3,7 @@
 # попробовать разнести функции/классы по разным файлам
 # поработать  над цветовой палитрой
 # сделать настройки с переключением светлой темы и темной темы
-#
+# польз настройки хранить в БД или научиться работать с конфигами
 
 
 from kivy.app import App
@@ -18,23 +18,8 @@ import difflib
 now = datetime.datetime.now()
 today = str(now.date())
 
-number_of_attempts = 1
-number_true_attempts = 1
-learned = 1
-a = 0
-Ans1 = 0
-Ans2 = 0
-Ans3 = 0
-Ans4 = 0
-t = '12345'
-theme = 0 # 0 - темная,1 светлая, 2 серая, 3 желтая
+theme = 0 # 0 - темная,1 светлая, 2 серая, 3 желтая, 4 розовая, а почему-бы и нет
 
-id_word = '2'
-#Question_word = 'вопрос'
-#Ans1_correct_resp = 'правильный ответ'
-#Ans2_resp = 'не верный 2'
-#Ans3_resp = 'не верный 3'
-#Ans4_resp = 'не верный 4'
 Rand = 0
 tap = 0
 background_color_clear = [0.4, 0.4, 0.4, 0.4]
@@ -44,7 +29,7 @@ background_color_incorrect = [1, 0, 0, 1]
 
 
 class db:
-    def create_db(self):
+    def create_db(self): # избавиться от функции нужно сразу создавать апк с БД внутри
         self.conn = sqlite3.connect('file_db.db')
         self.c = self.conn.cursor()
         self.c.execute(
@@ -90,6 +75,11 @@ class db:
         self.conn = sqlite3.connect('file_db.db')
         self.c = self.conn.cursor()
 
+        count_words = self.c.execute('select count(*), count(case when learned = 1 then 1 else 0 end) from words')
+        count_words = count_words.fetchone()
+        count_words = 'Total words ' + str(count_words[0]) +' /stydied words ' + str(count_words[1])
+        print(count_words)
+
         data_sql = self.c.execute('select id,word,translation,number_of_attempts,number_true_attempts from words order by date_next_read limit 1')
         data_sql = data_sql.fetchone()
         print(type(data_sql))
@@ -118,7 +108,7 @@ class db:
         Ans4_resp = matrix[1][0]
         Ans3_resp = matrix[2][0]
 
-        return (Question_word,Ans1_correct_resp,Ans2_resp,Ans4_resp,Ans3_resp,number_true_attempts,number_of_attempts)
+        return (Question_word,Ans1_correct_resp,Ans2_resp,Ans4_resp,Ans3_resp,number_true_attempts,number_of_attempts, count_words)
 
 
     def correct_response(self):  # если ответ был верным
@@ -210,6 +200,7 @@ class Screen1(Screen):
         Ans4_resp = d[4]
         number_true_attempts = d[5]
         number_of_attempts = d[6]
+        count_words = d[7]
 
 
         self.answer1.background_color = background_color_clear
@@ -217,7 +208,7 @@ class Screen1(Screen):
         self.answer3.background_color = background_color_clear
         self.answer4.background_color = background_color_clear
         self.question.text = Question_word
-        self.score.text = str(number_true_attempts) + ' / ' + str(number_of_attempts)
+        self.score.text = count_words + '\n'+ 'This word ' + str(number_true_attempts) + ' / ' + str(number_of_attempts)
         Rand = random.randint(1, 4)
         if Rand == 1:
             self.answer1.text = Ans1_correct_resp
@@ -240,6 +231,7 @@ class Screen1(Screen):
             self.answer3.text = Ans3_resp
             self.answer4.text = Ans1_correct_resp
         else:
+            print('все пошло по бороде')
             sys.exit()
 
     def check_response(self, num, a):
@@ -265,23 +257,7 @@ class Screen1(Screen):
             else:
                 print('ой')
 
-    def question_formation(self):
-        global Ans1
-        global Ans2
-        global Ans3
-        global Ans4
-        self.question.text = str(test_text)
-        self.answer1.text = 'быть'
-        self.answer2.text = 'не быть'
-        self.answer3.text = 'это ли вопрос?'
-        self.answer4.text = 'это не вопрос!'
-        Ans1 = 1
-        Ans2 = 0
-        Ans3 = 0
-        Ans4 = 0
-
-
-class Screen2(Screen):
+class Screen2(Screen): #это будет экран настроек
     pass
 
 
