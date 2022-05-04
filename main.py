@@ -90,15 +90,14 @@ class db:
         self.conn = sqlite3.connect('file_db.db')
         self.c = self.conn.cursor()
 
-        id_word = self.c.execute('select id from words order by date_next_read limit 1')
-        id_word = self.rep_lib(id_word.fetchall())
-
-        Question_word = self.c.execute('select word from words where id = :id_word order by date_next_read limit 1',{'id_word':id_word})
-        Question_word = self.rep_lib(Question_word.fetchall())
-
-        Ans1_correct_resp = self.c.execute('select translation from words where id = :id_word order by date_next_read limit 1',{'id_word':id_word})
-        Ans1_correct_resp = self.rep_lib(Ans1_correct_resp.fetchall())
-        print(Ans1_correct_resp)
+        data_sql = self.c.execute('select id,word,translation,number_of_attempts,number_true_attempts from words order by date_next_read limit 1')
+        data_sql = data_sql.fetchone()
+        print(type(data_sql))
+        id_word = data_sql[0]
+        Question_word = data_sql[1]
+        Ans1_correct_resp  = data_sql[2]
+        number_of_attempts = data_sql[3]
+        number_true_attempts = data_sql[4]
 
         incorr_answers = self.c.execute('select translation from words where id <> :id_word',{'id_word':id_word})
         rows = incorr_answers.fetchall()
@@ -114,13 +113,12 @@ class db:
             matrix[count][1] = matcher.ratio()
             count = count + 1
 
-
         matrix.sort(key = lambda x: x[1], reverse=True)
         Ans2_resp = matrix[0][0] # не попорядку специально
         Ans4_resp = matrix[1][0]
         Ans3_resp = matrix[2][0]
 
-        return (Question_word,Ans1_correct_resp,Ans2_resp,Ans4_resp,Ans3_resp)
+        return (Question_word,Ans1_correct_resp,Ans2_resp,Ans4_resp,Ans3_resp,number_true_attempts,number_of_attempts)
 
 
     def correct_response(self):  # если ответ был верным
@@ -153,10 +151,6 @@ class db:
         self.conn = sqlite3.connect('file_db.db')
         self.c = self.conn.cursor()
 
-
-
-
-        print(number_of_attempts, number_true_attempts)
         self.c.execute(
             """UPDATE words 
             SET date_last_read = ?,
@@ -208,13 +202,14 @@ class Screen1(Screen):
     def new_question(self):
         # db.qet_answer_and_question #создать функцию возврашает массив 1 - вопрос 2 - верный ответ 3-5 не верные ответы
         d = db.read_new_question(self)
-        print(d)
         global Rand
         Question_word = d[0]
         Ans1_correct_resp = d[1]
         Ans2_resp = d[2]
         Ans3_resp = d[3]
         Ans4_resp = d[4]
+        number_true_attempts = d[5]
+        number_of_attempts = d[6]
 
 
         self.answer1.background_color = background_color_clear
@@ -222,7 +217,7 @@ class Screen1(Screen):
         self.answer3.background_color = background_color_clear
         self.answer4.background_color = background_color_clear
         self.question.text = Question_word
-        print(a)
+        self.score.text = str(number_true_attempts) + ' / ' + str(number_of_attempts)
         Rand = random.randint(1, 4)
         if Rand == 1:
             self.answer1.text = Ans1_correct_resp
@@ -299,8 +294,6 @@ class Screen_add(Screen):
     def add_db_word(self):
         wordE = self.screen_add_input_english_word.text
         wordT = self.screen_add_input_translation.text
-        print(wordE)
-        print(wordT)
         db.add_word(self, wordE, wordT)
 
 
